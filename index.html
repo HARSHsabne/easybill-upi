@@ -156,44 +156,41 @@
       return '₹' + Number(amount).toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits:2});
     }
 
-  function buildUpiLink(data) {
-  return `upi://pay?pa=${encodeURIComponent(data.pa)}&pn=${encodeURIComponent(data.pn)}&am=${encodeURIComponent(data.am)}&tn=${encodeURIComponent(data.tn)}`;
-}
-
+    function buildUpiLink(data) {
+      return `upi://pay?pa=${encodeURIComponent(data.pa)}&pn=${encodeURIComponent(data.pn)}&am=${encodeURIComponent(data.am)}&tn=${encodeURIComponent(data.tn)}`;
+    }
 
     function updateQRCode(text) {
-  const qrContainer = document.getElementById("qrImg");
-  qrContainer.innerHTML = ""; // clear previous QR
-  new QRCode(qrContainer, {
-    text: text,
-    width: 140,
-    height: 140,
-    colorDark: "#000000",
-    colorLight: "#ffffff",
-    correctLevel: QRCode.CorrectLevel.H
-  });
-}
-
+      qrImg.innerHTML = "";
+      new QRCode(qrImg, {
+        text: text,
+        width: 140,
+        height: 140,
+        colorDark: "#000000",
+        colorLight: "#ffffff",
+        correctLevel: QRCode.CorrectLevel.H
+      });
+    }
 
     function updatePreview(data) {
-  const link = buildUpiLink({
-    pa: data.vpa || "test@upi",
-    pn: data.payeeName || data.shopName || "Merchant",
-    am: (Number(data.amount) || 0).toFixed(2),
-    tn: data.note || "Invoice"
-  });
+      const link = buildUpiLink({
+        pa: data.vpa || "test@upi",
+        pn: data.payeeName || data.shopName || "Merchant",
+        am: (Number(data.amount) || 0).toFixed(2),
+        tn: data.note || "Invoice"
+      });
 
-  console.log("Generated UPI Link:", link); // 🔍 Debug log
+      previewShop.textContent = data.shopName || "My Shop";
+      previewDate.textContent = data.date || new Date().toISOString().slice(0,10);
+      previewCust.textContent = data.custName || "—";
+      previewNote.textContent = data.note || "—";
+      previewAmount.textContent = formatINR(data.amount);
 
-  // Update text link
-  const upiLinkA = document.getElementById("upiLink");
-  upiLinkA.href = link;
-  upiLinkA.textContent = link;
+      upiLinkA.href = link;
+      upiLinkA.textContent = link;
 
-  // Generate QR
-  updateQRCode(link);
-}
-
+      updateQRCode(link);
+    }
 
     form.addEventListener('submit', (e) => {
       e.preventDefault();
@@ -219,7 +216,6 @@
     });
 
     printBtn.addEventListener('click', () => {
-      // Print just the invoice preview area
       const invoiceHTML = document.getElementById('invoicePreview').innerHTML;
       const win = window.open('', '_blank', 'width=800,height=900');
       win.document.write(`
@@ -264,7 +260,6 @@
       });
     }
 
-    // Expose functions to window for inline onclick in created nodes
     window.recallInvoice = function(index){
       const h = getHistory();
       const it = h[index];
@@ -305,9 +300,21 @@
     });
 
     clearBtn.addEventListener('click', () => {
-      shopNameEl.value = 'My Shop'; dateEl.value = new Date().toISOString().slice(0,10);
-      custNameEl.value = ''; noteEl.value=''; amountEl.value=''; vpaEl.value='merchant@upi'; payeeNameEl.value='';
-      previewShop.textContent='My Shop'; previewCust.textContent='—'; previewNote.textContent='—'; previewAmount.textContent='₹0.00'; upiLinkA.href='#'; upiLinkA.textContent='—'; qrImg.src='';
+      shopNameEl.value = 'My Shop'; 
+      dateEl.value = new Date().toISOString().slice(0,10);
+      custNameEl.value = ''; 
+      noteEl.value=''; 
+      amountEl.value=''; 
+      vpaEl.value='merchant@upi'; 
+      payeeNameEl.value='';
+      previewShop.textContent='My Shop'; 
+      previewDate.textContent=''; 
+      previewCust.textContent='—'; 
+      previewNote.textContent='—'; 
+      previewAmount.textContent='₹0.00'; 
+      upiLinkA.href='#'; 
+      upiLinkA.textContent='—'; 
+      qrImg.innerHTML='';
     });
 
     clearHistoryBtn.addEventListener('click', () => {
