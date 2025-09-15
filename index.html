@@ -50,6 +50,9 @@
             <label>Customer Name</label>
             <input id="custName" placeholder="e.g., Ramesh" required />
 
+            <label>Customer WhatsApp</label>
+            <input id="custWhatsapp" type="tel" placeholder="e.g., 9876543210">
+
             <label>Description / Note</label>
             <input id="note" placeholder="Product / service details" />
 
@@ -228,10 +231,19 @@
     });
 
     whatsappBtn.addEventListener('click', () => {
-      const text = `${previewShop.textContent}\nInvoice for ${previewCust.textContent}\nAmount: ${previewAmount.textContent}\nPay using link: ${upiLinkA.href}`;
-      const url = 'https://wa.me/?text=' + encodeURIComponent(text);
-      window.open(url, '_blank');
-    });
+  const phone = document.getElementById('custWhatsapp').value.trim();
+  const text = `${previewShop.textContent}\nInvoice for ${previewCust.textContent}\nAmount: ${previewAmount.textContent}\nPay using link: ${upiLinkA.href}`;
+
+  if (!phone) {
+    alert("Please enter customer's WhatsApp number");
+    return;
+  }
+
+  // Format Indian number: 91XXXXXXXXXX
+  const url = `https://wa.me/91${phone}?text=${encodeURIComponent(text)}`;
+  window.open(url, '_blank');
+});
+
 
     // History management
     function getHistory(){ return JSON.parse(localStorage.getItem('easybill_history') || '[]'); }
