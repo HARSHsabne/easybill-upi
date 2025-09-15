@@ -8,7 +8,7 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>EasyBill Demo — Invoice + UPI Link</title>
+  <title>EasyBill — Invoice + UPI Link</title>
   <style>
     :root{--bg:#f6f8fb;--card:#ffffff;--muted:#6b7280;--accent:#0ea5a0}
     body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial;background:var(--bg);margin:0;padding:24px;color:#0f1724}
@@ -33,7 +33,7 @@
   <div class="wrap">
     <header>
       <h1>EasyBill Demo — Invoice + UPI</h1>
-      <div class="small">No backend • Local demo • Save as PDF via Print</div>
+    
     </header>
 
     <div class="card">
@@ -41,7 +41,7 @@
         <div style="display:flex;gap:12px;align-items:flex-end;flex-wrap:wrap">
           <div style="flex:1">
             <label>Shop Name</label>
-            <input id="shopName" value="My Shop" required />
+            <input id="shopName" placeholder="My Shop" required />
           </div>
           <div style="width:200px">
             <label>Date</label>
@@ -54,7 +54,7 @@
             <label>Customer Name</label>
             <input id="custName" placeholder="e.g., Ramesh" required />
 
-            <label>Customer WhatsApp</label>
+            <label>Customer WhatsApp (Optional)</label>
             <input id="custWhatsapp" type="tel" placeholder="e.g., 9876543210">
 
             <label>Description / Note</label>
