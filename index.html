@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.9.3/html2pdf.bundle.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#0ea5a0">
@@ -246,32 +247,45 @@
     });
 
     // Replace your printBtn code with this
-  printBtn.addEventListener('click', async (e) => {
+printBtn.addEventListener('click', async (e) => {
     e.preventDefault();
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
 
-    // ensure QR is ready
-    const canvas = qrImg.querySelector("canvas");
-    if (canvas) {
-      // force convert canvas to <img>
-      const imgData = canvas.toDataURL("image/png");
-      qrImg.innerHTML = `<img src="${imgData}" style="width:140px;height:140px;border-radius:8px"/>`;
+    // Shop header
+    doc.setFontSize(16);
+    doc.text(previewShop.textContent, 20, 20);
+    doc.setFontSize(10);
+    doc.text("Date: " + (previewDate.textContent || ""), 20, 28);
+
+    // Customer info
+    doc.setFontSize(12);
+    doc.text("Bill To: " + (previewCust.textContent || "—"), 20, 40);
+
+    // Note
+    doc.setFontSize(10);
+    doc.text("Note: " + (previewNote.textContent || "—"), 20, 50);
+
+    // Amount
+    doc.setFontSize(14);
+    doc.text("Amount: " + (previewAmount.textContent || "₹0.00"), 20, 65);
+
+    // UPI Link
+    doc.setFontSize(10);
+    doc.text("UPI Link:", 20, 80);
+    doc.setFontSize(9);
+    doc.text(upiLinkA.href || "—", 20, 87, { maxWidth: 160 });
+
+    // Add QR Code Image
+    const qrImgEl = document.querySelector("#qrImg img");
+    if (qrImgEl) {
+      const qrData = qrImgEl.src;
+      doc.addImage(qrData, "PNG", 150, 20, 40, 40);
     }
 
-    // small delay to make sure DOM updates
-    await new Promise(r => setTimeout(r, 200));
-
-    const element = document.getElementById('invoicePreview');
-    const opt = {
-      margin: 10,
-      filename: 'invoice.pdf',
-      image: { type: 'jpeg', quality: 0.98 },
-      html2canvas: { scale: 2, useCORS: true },
-      jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
-    };
-
-    html2pdf().from(element).set(opt).save();
+    // Save PDF
+    doc.save("invoice.pdf");
   });
-
 
     whatsappBtn.addEventListener('click', () => {
   const phone = document.getElementById('custWhatsapp').value.trim();
