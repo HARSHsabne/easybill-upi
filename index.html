@@ -245,18 +245,32 @@
       setTimeout(()=> msg.textContent='', 3000);
     });
 
-    printBtn.addEventListener('click', (e) => {
-  e.preventDefault();
-  const element = document.getElementById('invoicePreview');
-  const opt = {
-    margin: 10,
-    filename: 'invoice.pdf',
-    image: { type: 'jpeg', quality: 0.98 },
-    html2canvas: { scale: 2 },
-    jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
-  };
-  html2pdf().from(element).set(opt).save();
-});
+    // Replace your printBtn code with this
+  printBtn.addEventListener('click', async (e) => {
+    e.preventDefault();
+
+    // ensure QR is ready
+    const canvas = qrImg.querySelector("canvas");
+    if (canvas) {
+      // force convert canvas to <img>
+      const imgData = canvas.toDataURL("image/png");
+      qrImg.innerHTML = `<img src="${imgData}" style="width:140px;height:140px;border-radius:8px"/>`;
+    }
+
+    // small delay to make sure DOM updates
+    await new Promise(r => setTimeout(r, 200));
+
+    const element = document.getElementById('invoicePreview');
+    const opt = {
+      margin: 10,
+      filename: 'invoice.pdf',
+      image: { type: 'jpeg', quality: 0.98 },
+      html2canvas: { scale: 2, useCORS: true },
+      jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+    };
+
+    html2pdf().from(element).set(opt).save();
+  });
 
 
     whatsappBtn.addEventListener('click', () => {
