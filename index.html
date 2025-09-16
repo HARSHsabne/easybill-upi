@@ -179,16 +179,25 @@
     }
 
     function updateQRCode(text) {
-      qrImg.innerHTML = "";
-      new QRCode(qrImg, {
-        text: text,
-        width: 140,
-        height: 140,
-        colorDark: "#000000",
-        colorLight: "#ffffff",
-        correctLevel: QRCode.CorrectLevel.H
-      });
+  qrImg.innerHTML = "";
+  const qr = new QRCode(qrImg, {
+    text: text,
+    width: 140,
+    height: 140,
+    colorDark: "#000000",
+    colorLight: "#ffffff",
+    correctLevel: QRCode.CorrectLevel.H
+  });
+
+  // Wait a moment then convert canvas to img
+  setTimeout(() => {
+    const canvas = qrImg.querySelector("canvas");
+    if (canvas) {
+      const imgData = canvas.toDataURL("image/png");
+      qrImg.innerHTML = `<img src="${imgData}" style="width:140px;height:140px;border-radius:8px"/>`;
     }
+  }, 300);
+}
 
     function updatePreview(data) {
       const link = buildUpiLink({
