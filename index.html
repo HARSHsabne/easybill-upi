@@ -1,6 +1,8 @@
 <!doctype html>
 <html lang="en">
 <head>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.9.3/html2pdf.bundle.min.js"></script>
+
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#0ea5a0">
 <link rel="icon" href="icon-192.png">
@@ -242,17 +244,19 @@
       setTimeout(()=> msg.textContent='', 3000);
     });
 
-    printBtn.addEventListener('click', () => {
-      const invoiceHTML = document.getElementById('invoicePreview').innerHTML;
-      const win = window.open('', '_blank', 'width=800,height=900');
-      win.document.write(`
-        <html><head><title>Invoice</title>
-        <style>body{font-family:Arial,Helvetica,sans-serif;padding:20px;color:#111} .small{color:#666}</style>
-        </head><body>${invoiceHTML}</body></html>`);
-      win.document.close();
-      win.focus();
-      setTimeout(()=> win.print(), 400);
-    });
+    printBtn.addEventListener('click', (e) => {
+  e.preventDefault();
+  const element = document.getElementById('invoicePreview');
+  const opt = {
+    margin: 10,
+    filename: 'invoice.pdf',
+    image: { type: 'jpeg', quality: 0.98 },
+    html2canvas: { scale: 2 },
+    jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+  };
+  html2pdf().from(element).set(opt).save();
+});
+
 
     whatsappBtn.addEventListener('click', () => {
   const phone = document.getElementById('custWhatsapp').value.trim();
