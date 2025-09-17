@@ -1,441 +1,209 @@
 <!doctype html>
 <html lang="en">
 <head>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.9.3/html2pdf.bundle.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-
-<link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#0ea5a0">
-<link rel="icon" href="icon-192.png">
-
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>EasyBill – Free UPI Invoice Generator</title>
- <meta name="description" content="Create free UPI invoices in seconds. Simple, fast, and secure billing tool for shop owners and freelancers.">
-<style>
-    :root{--bg:#f6f8fb;--card:#ffffff;--muted:#6b7280;--accent:#0ea5a0}
-    body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial;background:var(--bg);margin:0;padding:24px;color:#0f1724}
-    .wrap{max-width:980px;margin:0 auto}
-    header{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px}
-    h1{margin:0;font-size:20px}
-    .card{background:var(--card);padding:18px;border-radius:12px;box-shadow:0 6px 18px rgba(10,10,10,0.06);margin-bottom:16px}
-    label{display:block;font-size:13px;color:var(--muted);margin-top:8px}
-    input, textarea, select{width:100%;padding:8px;border-radius:8px;border:1px solid #e6eef2;margin-top:6px;box-sizing:border-box}
-    .grid{display:grid;grid-template-columns:1fr 320px;gap:12px}
-    .btn{display:inline-block;padding:8px 12px;border-radius:8px;border:0;background:var(--accent);color:white;text-decoration:none;cursor:pointer}
-    .btn.ghost{background:transparent;border:1px solid #e6eef2;color:var(--muted)}
-    .small{font-size:13px;color:var(--muted)}
-    #invoicePreview{padding:14px;border-radius:8px;background:#fbffff}
-    .invoice-row{display:flex;justify-content:space-between;gap:12px}
-    .history-list{max-height:220px;overflow:auto;margin-top:8px}
-    .history-item{padding:8px;border-radius:8px;border:1px dashed #edf2f7;margin-bottom:8px;font-size:13px;display:flex;justify-content:space-between;align-items:center}
-    @media (max-width:900px){ .grid{grid-template-columns:1fr} }
+  <title>EasyBill — Invoice + UPI Link</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <style>
+	  @media print {
+  body * { visibility: hidden; }
+  #previewBox, #previewBox * { visibility: visible; }
+  #previewBox { position: absolute; top: 0; left: 0; width: 100%; }
+}
+
+    body{font-family:sans-serif;margin:0;padding:20px;background:#f6f8fb;color:#333}
+    h1{color:#0ea5a0;text-align:center;margin-bottom:15px}
+    form{background:#fff;padding:15px;border-radius:10px;box-shadow:0 2px 6px rgba(0,0,0,.1);margin-bottom:20px}
+    label{display:block;margin:10px 0 4px}
+    input,select,textarea{width:100%;padding:8px;border:1px solid #ccc;border-radius:6px}
+    button{background:#0ea5a0;color:#fff;border:none;padding:10px 16px;margin-top:10px;border-radius:6px;cursor:pointer}
+    button.ghost{background:#eee;color:#333}
+    .preview{background:#fff;padding:15px;border-radius:10px;box-shadow:0 2px 6px rgba(0,0,0,.1);margin-top:20px}
+    .preview h3{margin-top:0}
+    .row{display:flex;justify-content:space-between;margin:4px 0}
+    .qr{margin-top:12px;text-align:center}
+    .history-item{display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid #ddd}
+    .msg{color:red;text-align:center;margin:10px 0}
+    .template-simple{font-family:sans-serif;}
+    .template-modern{font-family:Arial,Helvetica,sans-serif;border-left:4px solid #0ea5a0;padding-left:10px;}
+    .template-classic{font-family:"Times New Roman",serif;font-style:italic;background:#fafafa;border:1px dashed #999;padding:10px;}
   </style>
 </head>
 <body>
-  <div class="wrap">
-    <header>
-      <h1>EasyBill-UPI — Invoice + UPI</h1>
-    
-    </header>
-<!-- Adsterra Banner -->
-<div style="text-align:center; margin:15px 0;">
-  <script type="text/javascript">
-	atOptions = {
-		'key' : '94d1a125af9ff27e814e750ee55de083',
-		'format' : 'iframe',
-		'height' : 50,
-		'width' : 320,
-		'params' : {}
-	};
-</script>
-<script type="text/javascript" src="//www.highperformanceformat.com/94d1a125af9ff27e814e750ee55de083/invoke.js"></script>
+
+<h1>EasyBill — Invoice Generator</h1>
+
+<form id="invoiceForm">
+  <label>Shop Name</label>
+  <input id="shopName" placeholder="My Shop"/>
+  
+  <label>Date</label>
+  <input id="date" type="date"/>
+  
+  <label>Customer Name</label>
+  <input id="custName" placeholder="Customer"/>
+  
+  <label>Note</label>
+  <textarea id="note" placeholder="Payment for order..."></textarea>
+  
+  <label>Amount (INR)</label>
+  <input id="amount" type="number" step="0.01"/>
+  
+  <label>UPI ID (VPA)</label>
+  <input id="vpa" placeholder="example@upi"/>
+  
+  <label>Payee Name</label>
+  <input id="payeeName" placeholder="Receiver name"/>
+  
+  <label>Payment Type</label>
+  <select id="paymentType">
+    <option>UPI</option>
+    <option>Cash</option>
+    <option>Card</option>
+    <option>Wallet</option>
+  </select>
+  
+  <label>Invoice Template</label>
+  <select id="templateType">
+    <option value="simple">Simple</option>
+    <option value="modern">Modern</option>
+    <option value="classic">Classic</option>
+  </select>
+  
+  <button type="submit">Generate Invoice</button>
+</form>
+
+<div class="msg" id="msg"></div>
+
+<div id="previewBox" class="preview template-simple">
+  <h3 id="previewShop">My Shop</h3>
+  <div class="row"><strong>Date:</strong> <span id="previewDate">—</span></div>
+  <div class="row"><strong>Customer:</strong> <span id="previewCust">—</span></div>
+  <div class="row"><strong>Note:</strong> <span id="previewNote">—</span></div>
+  <div class="row"><strong>Amount:</strong> <span id="previewAmount">—</span></div>
+  <div class="row"><strong>Payment Type:</strong> <span id="previewPayType">—</span></div>
+  <div class="row"><strong>UPI Link:</strong> <a id="upiLink" href="#" target="_blank">—</a></div>
+  <div class="qr" id="qrImg"></div>
+  <button id="saveBtn">Save Invoice</button>
+  <button id="printBtn" class="ghost">Print/PDF</button>
+  <button id="shareBtn" class="ghost">Share WhatsApp</button>
+
 </div>
-    <div class="card">
-      <form id="invoiceForm">
-        <div style="display:flex;gap:12px;align-items:flex-end;flex-wrap:wrap">
-          <div style="flex:1">
-            <label>Shop Name</label>
-            <input id="shopName" placeholder="My Shop" required />
-          </div>
-          <div style="width:200px">
-            <label>Date</label>
-            <input id="date" type="date" />
-          </div>
-        </div>
 
-        <div class="grid" style="margin-top:12px">
-          <div>
-            <label>Customer Name</label>
-            <input id="custName" placeholder="e.g., Ramesh" required />
+<h3>Saved Invoices</h3>
+<div id="history"></div>
+<button id="clearHistory">Clear History</button>
 
-            <label>Customer WhatsApp (Optional)</label>
-            <input id="custWhatsapp" type="tel" placeholder="e.g., 9876543210">
+<script>
+  const form = document.getElementById('invoiceForm');
+  const dateEl = document.getElementById('date');
+  const previewShop = document.getElementById('previewShop');
+  const previewDate = document.getElementById('previewDate');
+  const previewCust = document.getElementById('previewCust');
+  const previewNote = document.getElementById('previewNote');
+  const previewAmount = document.getElementById('previewAmount');
+  const previewPayType = document.getElementById('previewPayType');
+  const upiLinkA = document.getElementById('upiLink');
+  const qrImg = document.getElementById('qrImg');
+  const msg = document.getElementById('msg');
+  const historyEl = document.getElementById('history');
+  const previewBox = document.getElementById('previewBox');
 
-            <label>Description / Note</label>
-            <input id="note" placeholder="Product / service details" />
+  dateEl.value = new Date().toISOString().slice(0,10);
 
-            <label>Amount (₹)</label>
-            <input id="amount" type="number" step="0.01" min="0" placeholder="0.00" required />
+  function formatINR(amount){
+    return '₹' + Number(amount).toLocaleString('en-IN', {minimumFractionDigits:2, maximumFractionDigits:2});
+  }
+  function buildUpiLink(data){
+    return `upi://pay?pa=${encodeURIComponent(data.pa)}&pn=${encodeURIComponent(data.pn)}&am=${encodeURIComponent(data.am)}&tn=${encodeURIComponent(data.tn)}`;
+  }
+  function updateQRCode(text){
+    qrImg.innerHTML = "";
+    new QRCode(qrImg,{text,width:140,height:140});
+  }
+  function updatePreview(data){
+    const link = buildUpiLink({
+      pa:data.vpa||"test@upi",
+      pn:data.payeeName||data.shopName||"Merchant",
+      am:(Number(data.amount)||0).toFixed(2),
+      tn:data.note||"Invoice"
+    });
+    previewShop.textContent=data.shopName||"My Shop";
+    previewDate.textContent=data.date;
+    previewCust.textContent=data.custName||"—";
+    previewNote.textContent=data.note||"—";
+    previewAmount.textContent=formatINR(data.amount);
+    previewPayType.textContent=data.paymentType;
+    upiLinkA.href=link; upiLinkA.textContent=link;
+    updateQRCode(link);
+    previewBox.className="preview template-"+data.template;
+  }
 
-<label>Payment Type</label>
-<select id="paymentType">
-  <option value="UPI">UPI</option>
-  <option value="Cash">Cash</option>
-  <option value="Card">Card</option>
-  <option value="Wallet">Wallet</option>
-</select>
-
-			  
-            <label style="margin-top:10px">UPI VPA (merchant/payee)</label>
-            <input id="vpa" placeholder="merchant@upi" value="merchant@upi" required />
-
-            <label class="small">Optional: Customer UPI name (for QR label)</label>
-            <input id="payeeName" placeholder="Customer or payee display name" />
-			  <label>Invoice Template</label>
-<select id="templateType">
-  <option value="simple">Simple</option>
-  <option value="modern">Modern</option>
-  <option value="classic">Classic</option>
-</select>
-
-            <div style="margin-top:10px;display:flex;gap:8px">
-              <button class="btn" type="submit">Generate Invoice</button>
-              <button id="clearBtn" type="button" class="btn ghost">Clear</button>
-            </div>
-            <div id="msg" class="small" style="margin-top:8px;color:#1f9d8d"></div>
-          </div>
-
-          <div>
-            <div id="invoicePreview" class="card">
-              <div style="display:flex;justify-content:space-between;align-items:center">
-                <div>
-                  <strong id="previewShop">My Shop</strong><br>
-                  <span id="previewDate" class="small"></span>
-                </div>
-                <div style="text-align:right">
-                  <div class="small">INVOICE</div>
-                  <div id="previewAmount" style="font-weight:700;font-size:20px">₹0.00</div>
-                </div>
-              </div>
-
-              <hr style="margin:8px 0;border:none;border-top:1px solid #eef4f6">
-
-              <div class="small">Bill To</div>
-              <div id="previewCust" style="font-weight:600">—</div>
-              <div id="previewNote" class="small" style="margin-top:8px;color:var(--muted)">—</div>
-
-              <div style="margin-top:12px" class="invoice-row">
-                <div>
-                  <div class="small">UPI Link</div>
-                  <div style="word-break:break-all"><a id="upiLink" href="#" target="_blank" rel="noopener noreferrer">—</a></div>
-                </div>
-                <div style="text-align:center">
-                  <div class="small">Scan to Pay</div>
-                  <div id="qrImg" style="width:140px;height:140px;border-radius:8px;margin-top:6px;background:#fff;padding:6px"></div>
-                </div>
-              </div>
-
-              <div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap">
-                <button id="printBtn" class="btn">Print / Save as PDF</button>
-                <button id="whatsappBtn" class="btn ghost">Send via WhatsApp</button>
-                <button id="saveBtn" class="btn ghost">Save to History</button>
-              </div>
-            </div>
-
-            <div style="margin-top:10px" class="card">
-              <div style="display:flex;align-items:center;justify-content:space-between">
-                <strong>Saved Invoices</strong>
-                <button id="clearHistory" class="btn ghost">Clear All</button>
-              </div>
-              <div class="history-list" id="history"></div>
-            </div>
-          </div>
-        </div>
-      </form>
-    </div>
-
-    <footer style="text-align:center;color:var(--muted);margin-top:10px">
-     
-	</footer>
-
-  <script>
-    // Elements
-    const form = document.getElementById('invoiceForm');
-    const shopNameEl = document.getElementById('shopName');
-    const dateEl = document.getElementById('date');
-    const custNameEl = document.getElementById('custName');
-    const noteEl = document.getElementById('note');
-    const amountEl = document.getElementById('amount');
-    const vpaEl = document.getElementById('vpa');
-    const payeeNameEl = document.getElementById('payeeName');
-    paymentType: document.getElementById("paymentType").value,
-    template: document.getElementById("invoiceTemplate").value
-	  
-    const previewShop = document.getElementById('previewShop');
-    const previewDate = document.getElementById('previewDate');
-    const previewCust = document.getElementById('previewCust');
-    const previewNote = document.getElementById('previewNote');
-	const previewAmount = document.getElementById('previewAmount');
-    previewNote.textContent = `${data.note || "—"} | Payment: ${data.paymentType}`;
-	const upiLinkA = document.getElementById('upiLink');
-    const qrImg = document.getElementById('qrImg');
-    const msg = document.getElementById('msg');
-    const printBtn = document.getElementById('printBtn');
-    const whatsappBtn = document.getElementById('whatsappBtn');
-    const saveBtn = document.getElementById('saveBtn');
-    const historyEl = document.getElementById('history');
-    const clearBtn = document.getElementById('clearBtn');
-    const clearHistoryBtn = document.getElementById('clearHistory');
-
-    // On load: set today's date
-    dateEl.value = new Date().toISOString().slice(0,10);
-
-    function formatINR(amount){
-      return '₹' + Number(amount).toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits:2});
-    }
-
-    function buildUpiLink(data) {
-      return `upi://pay?pa=${encodeURIComponent(data.pa)}&pn=${encodeURIComponent(data.pn)}&am=${encodeURIComponent(data.am)}&tn=${encodeURIComponent(data.tn)}`;
-    }
-
-    function updateQRCode(text) {
-  qrImg.innerHTML = "";
-  const qr = new QRCode(qrImg, {
-    text: text,
-    width: 140,
-    height: 140,
-    colorDark: "#000000",
-    colorLight: "#ffffff",
-    correctLevel: QRCode.CorrectLevel.H
+  form.addEventListener('submit', e=>{
+    e.preventDefault();
+    const data={
+      shopName:document.getElementById('shopName').value.trim(),
+      date:dateEl.value,
+      custName:document.getElementById('custName').value.trim(),
+      note:document.getElementById('note').value.trim(),
+      amount:Number(document.getElementById('amount').value||0).toFixed(2),
+      vpa:document.getElementById('vpa').value.trim(),
+      payeeName:document.getElementById('payeeName').value.trim(),
+      paymentType:document.getElementById('paymentType').value,
+      template:document.getElementById('templateType').value
+    };
+    if(!data.custName||!data.amount||!data.vpa){msg.textContent="Fill Customer, Amount & UPI";setTimeout(()=>msg.textContent="",2500);return;}
+    updatePreview(data);
+    msg.textContent="Invoice generated.";
+    setTimeout(()=>msg.textContent="",2500);
   });
 
-  // Wait a moment then convert canvas to img
-  setTimeout(() => {
-    const canvas = qrImg.querySelector("canvas");
-    if (canvas) {
-      const imgData = canvas.toDataURL("image/png");
-      qrImg.innerHTML = `<img src="${imgData}" style="width:140px;height:140px;border-radius:8px"/>`;
-    }
-  }, 300);
-}
-
-    function updatePreview(data) {
-      const link = buildUpiLink({
-        pa: data.vpa || "test@upi",
-        pn: data.payeeName || data.shopName || "Merchant",
-        am: (Number(data.amount) || 0).toFixed(2),
-        tn: data.note || "Invoice"
-      });
-
-      previewShop.textContent = data.shopName || "My Shop";
-      previewDate.textContent = data.date || new Date().toISOString().slice(0,10);
-      previewCust.textContent = data.custName || "—";
-      previewNote.textContent = data.note || "—";
-      previewAmount.textContent = formatINR(data.amount);
-
-      upiLinkA.href = link;
-      upiLinkA.textContent = link;
-
-      updateQRCode(link);
-    }
-
-    form.addEventListener('submit', (e) => {
-      e.preventDefault();
-      const payload = {
-        shopName: shopNameEl.value.trim(),
-        date: dateEl.value,
-        custName: custNameEl.value.trim(),
-        note: noteEl.value.trim(),
-        amount: Number(amountEl.value || 0).toFixed(2),
-        vpa: vpaEl.value.trim(),
-        payeeName: payeeNameEl.value.trim()
-      };
-
-      if(!payload.custName || !payload.amount || !payload.vpa){
-        msg.textContent = 'Please fill Customer name, Amount and UPI VPA';
-        setTimeout(()=> msg.textContent='', 3500);
-        return;
-      }
-
-      updatePreview(payload);
-      msg.textContent = 'Invoice generated below. You can print or save as PDF.';
-      setTimeout(()=> msg.textContent='', 3000);
-    });
-
-    // Replace your printBtn code with this
-printBtn.addEventListener('click', async (e) => {
-    e.preventDefault();
-    const { jsPDF } = window.jspdf;
-    const doc = new jsPDF();
-if (payload.template === "modern") {
-  doc.setFont("helvetica", "bold");
-  doc.setTextColor(14,165,160); // teal
-  doc.setFontSize(16);
-} else if (payload.template === "business") {
-  doc.setFont("times", "italic");
-  doc.setTextColor(0,0,0);
-  doc.setFillColor(230,230,230);
-  doc.rect(10,10,190,10,"F");
-  doc.setFontSize(14);
-} else {
-  doc.setFont("helvetica", "normal");
-  doc.setTextColor(0,0,0);
-}
-
-    // Shop header
-    doc.setFontSize(16);
-    doc.text(previewShop.textContent, 20, 20);
-    doc.setFontSize(10);
-    doc.text("Date: " + (previewDate.textContent || ""), 20, 28);
-
-    // Customer info
-    doc.setFontSize(12);
-    doc.text("Bill To: " + (previewCust.textContent || "—"), 20, 40);
-
-    // Note
-    doc.setFontSize(10);
-    doc.text("Note: " + (previewNote.textContent || "—"), 20, 50);
-
-    // Amount
-    doc.setFontSize(14);
-    doc.text("Amount: " + (previewAmount.textContent || "₹0.00"), 20, 65);
-
-    // UPI Link
-    doc.setFontSize(10);
-    doc.text("UPI Link:", 20, 80);
-    doc.setFontSize(9);
-    doc.text(upiLinkA.href || "—", 20, 87, { maxWidth: 160 });
-
-    // Add QR Code Image
-    const qrImgEl = document.querySelector("#qrImg img");
-    if (qrImgEl) {
-      const qrData = qrImgEl.src;
-      doc.addImage(qrData, "PNG", 150, 20, 40, 40);
-    }
-
-    // Save PDF
-    doc.save("invoice.pdf");
-  });
-
-    whatsappBtn.addEventListener('click', () => {
-  const phone = document.getElementById('custWhatsapp').value.trim();
-  const text = `${previewShop.textContent}\nInvoice for ${previewCust.textContent}\nAmount: ${previewAmount.textContent}\nPay using link: ${upiLinkA.href}`;
-
-  if (!phone) {
-    alert("Please enter customer's WhatsApp number");
-    return;
-  }
-
-  // Format Indian number: 91XXXXXXXXXX
-  const url = `https://wa.me/91${phone}?text=${encodeURIComponent(text)}`;
-  window.open(url, '_blank');
-});
-
-
-    // History management
-    function getHistory(){ return JSON.parse(localStorage.getItem('easybill_history') || '[]'); }
-    function saveToHistory(item){
-      const h = getHistory();
-      h.unshift({...item, ts: new Date().toISOString()});
-      localStorage.setItem('easybill_history', JSON.stringify(h.slice(0,50)));
-      renderHistory();
-    }
-    function renderHistory(){
-      const h = getHistory();
-      historyEl.innerHTML = '';
-      if(h.length === 0){ historyEl.innerHTML = '<div class="small" style="padding:8px;color:#666">No saved invoices</div>'; return;}
-      h.forEach((it, idx) => {
-        const el = document.createElement('div');
-        el.className = 'history-item';
-        el.innerHTML = `<div>
-  <div style="font-weight:600">${it.custName} • ₹${it.amount}</div>
-  <div class="small">${new Date(it.ts).toLocaleString()} | ${it.paymentType} | ${it.template}</div>
-</div>
-<div style="display:flex;flex-direction:column;gap:6px">
-  <button class="btn ghost" data-idx="${idx}" onclick="recallInvoice(${idx})">Recall</button>
-  <button class="btn" data-idx="${idx}" onclick="deleteInvoice(${idx})">Delete</button>
-</div>`;
-
-        historyEl.appendChild(el);
-      });
-    }
-
-    window.recallInvoice = function(index){
-      const h = getHistory();
-      const it = h[index];
-      if(!it) return;
-      shopNameEl.value = it.shopName;
-      dateEl.value = it.date;
-      custNameEl.value = it.custName;
-      noteEl.value = it.note;
-      amountEl.value = it.amount;
-      vpaEl.value = it.vpa;
-      payeeNameEl.value = it.payeeName;
-      updatePreview(it);
-      msg.textContent = 'Recalled invoice from history';
-      setTimeout(()=> msg.textContent='',2000);
-    }
-
-    window.deleteInvoice = function(index){
-      const h = getHistory();
-      h.splice(index,1);
-      localStorage.setItem('easybill_history', JSON.stringify(h));
-      renderHistory();
-    }
-
-    saveBtn.addEventListener('click', () => {
-      const data = {
-        shopName: shopNameEl.value.trim(),
-        date: dateEl.value,
-        custName: custNameEl.value.trim(),
-        note: noteEl.value.trim(),
-        amount: Number(amountEl.value || 0).toFixed(2),
-        vpa: vpaEl.value.trim(),
-        payeeName: payeeNameEl.value.trim()
-      };
-      if(!data.custName || !data.amount) { msg.textContent = 'Fill customer and amount to save'; setTimeout(()=> msg.textContent='',2000); return; }
-      saveToHistory(data);
-      msg.textContent = 'Saved to local history';
-      setTimeout(()=> msg.textContent='',1500);
-    });
-
-    clearBtn.addEventListener('click', () => {
-      shopNameEl.value = 'My Shop'; 
-      dateEl.value = new Date().toISOString().slice(0,10);
-      custNameEl.value = ''; 
-      noteEl.value=''; 
-      amountEl.value=''; 
-      vpaEl.value='merchant@upi'; 
-      payeeNameEl.value='';
-      previewShop.textContent='My Shop'; 
-      previewDate.textContent=''; 
-      previewCust.textContent='—'; 
-      previewNote.textContent='—'; 
-      previewAmount.textContent='₹0.00'; 
-      upiLinkA.href='#'; 
-      upiLinkA.textContent='—'; 
-      qrImg.innerHTML='';
-    });
-
-    clearHistoryBtn.addEventListener('click', () => {
-      if(!confirm('Clear all saved invoices?')) return;
-      localStorage.removeItem('easybill_history');
-      renderHistory();
-    });
-
-    // Initial render
-    renderHistory();
-  </script>
-  <script>
-  if ("serviceWorker" in navigator) {
-    window.addEventListener("load", () => {
-      navigator.serviceWorker.register("service-worker.js")
-        .then(reg => console.log("Service Worker registered:", reg))
-        .catch(err => console.error("Service Worker failed:", err));
+  function getHistory(){return JSON.parse(localStorage.getItem('easybill_history')||'[]');}
+  function setHistory(h){localStorage.setItem('easybill_history',JSON.stringify(h));}
+  function renderHistory(){
+    historyEl.innerHTML="";
+    getHistory().forEach((it,i)=>{
+      const div=document.createElement("div");
+      div.className="history-item";
+      div.innerHTML=`<span>${it.date} - ${it.custName} (${it.paymentType}) - ${formatINR(it.amount)}</span>
+        <button class="ghost" data-i="${i}">View</button>`;
+      div.querySelector("button").onclick=()=>updatePreview(it);
+      historyEl.appendChild(div);
     });
   }
+  document.getElementById('saveBtn').onclick=()=>{
+    const data={
+      shopName:document.getElementById('shopName').value.trim(),
+      date:dateEl.value,
+      custName:document.getElementById('custName').value.trim(),
+      note:document.getElementById('note').value.trim(),
+      amount:Number(document.getElementById('amount').value||0).toFixed(2),
+      vpa:document.getElementById('vpa').value.trim(),
+      payeeName:document.getElementById('payeeName').value.trim(),
+      paymentType:document.getElementById('paymentType').value,
+      template:document.getElementById('templateType').value
+    };
+    const h=getHistory();h.unshift(data);setHistory(h);renderHistory();
+    msg.textContent="Invoice saved.";setTimeout(()=>msg.textContent="",2000);
+  };
+  document.getElementById('clearHistory').onclick=()=>{localStorage.removeItem('easybill_history');renderHistory();};
+
+  document.getElementById('printBtn').onclick=()=>window.print();
+
+  renderHistory();
+	document.getElementById('shareBtn').onclick = () => {
+  const shop = document.getElementById('shopName').value.trim() || "My Shop";
+  const cust = document.getElementById('custName').value.trim() || "Customer";
+  const amt  = document.getElementById('amount').value || "0.00";
+  const pay  = document.getElementById('paymentType').value;
+  const link = upiLinkA.href;
+
+  const message = `🧾 *Invoice from ${shop}* \n\n👤 Customer: ${cust}\n💰 Amount: ₹${amt}\n💳 Payment: ${pay}\n\n🔗 Pay using UPI: ${link}`;
+  const url = "https://wa.me/?text=" + encodeURIComponent(message);
+  window.open(url, "_blank");
+};
+
 </script>
 
 </body>
