@@ -1,7 +1,7 @@
 {
   "name": "EasyBill — Invoice + UPI",
   "short_name": "EasyBill",
-  "start_url": "./index.html",
+  "start_url": ".",
   "display": "standalone",
   "background_color": "#f6f8fb",
   "theme_color": "#0ea5a0",
