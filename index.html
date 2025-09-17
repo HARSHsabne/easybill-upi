@@ -79,11 +79,27 @@
             <label>Amount (₹)</label>
             <input id="amount" type="number" step="0.01" min="0" placeholder="0.00" required />
 
+<label>Payment Type</label>
+<select id="paymentType">
+  <option value="UPI">UPI</option>
+  <option value="Cash">Cash</option>
+  <option value="Card">Card</option>
+  <option value="Wallet">Wallet</option>
+</select>
+
+			  
             <label style="margin-top:10px">UPI VPA (merchant/payee)</label>
             <input id="vpa" placeholder="merchant@upi" value="merchant@upi" required />
 
             <label class="small">Optional: Customer UPI name (for QR label)</label>
             <input id="payeeName" placeholder="Customer or payee display name" />
+			  <label>Invoice Template</label>
+<select id="templateType">
+  <option value="simple">Simple</option>
+  <option value="modern">Modern</option>
+  <option value="classic">Classic</option>
+</select>
+
             <div style="margin-top:10px;display:flex;gap:8px">
               <button class="btn" type="submit">Generate Invoice</button>
               <button id="clearBtn" type="button" class="btn ghost">Clear</button>
@@ -154,15 +170,17 @@
     const amountEl = document.getElementById('amount');
     const vpaEl = document.getElementById('vpa');
     const payeeNameEl = document.getElementById('payeeName');
-
+    paymentType: document.getElementById("paymentType").value,
+    template: document.getElementById("invoiceTemplate").value
+	  
     const previewShop = document.getElementById('previewShop');
     const previewDate = document.getElementById('previewDate');
     const previewCust = document.getElementById('previewCust');
     const previewNote = document.getElementById('previewNote');
-    const previewAmount = document.getElementById('previewAmount');
-    const upiLinkA = document.getElementById('upiLink');
+	const previewAmount = document.getElementById('previewAmount');
+    previewNote.textContent = `${data.note || "—"} | Payment: ${data.paymentType}`;
+	const upiLinkA = document.getElementById('upiLink');
     const qrImg = document.getElementById('qrImg');
-
     const msg = document.getElementById('msg');
     const printBtn = document.getElementById('printBtn');
     const whatsappBtn = document.getElementById('whatsappBtn');
@@ -251,6 +269,20 @@ printBtn.addEventListener('click', async (e) => {
     e.preventDefault();
     const { jsPDF } = window.jspdf;
     const doc = new jsPDF();
+if (payload.template === "modern") {
+  doc.setFont("helvetica", "bold");
+  doc.setTextColor(14,165,160); // teal
+  doc.setFontSize(16);
+} else if (payload.template === "business") {
+  doc.setFont("times", "italic");
+  doc.setTextColor(0,0,0);
+  doc.setFillColor(230,230,230);
+  doc.rect(10,10,190,10,"F");
+  doc.setFontSize(14);
+} else {
+  doc.setFont("helvetica", "normal");
+  doc.setTextColor(0,0,0);
+}
 
     // Shop header
     doc.setFontSize(16);
@@ -318,13 +350,14 @@ printBtn.addEventListener('click', async (e) => {
         const el = document.createElement('div');
         el.className = 'history-item';
         el.innerHTML = `<div>
-            <div style="font-weight:600">${it.custName} • ${formatINR(it.amount)}</div>
-            <div class="small">${new Date(it.ts).toLocaleString()}</div>
-          </div>
-          <div style="display:flex;flex-direction:column;gap:6px">
-            <button class="btn ghost" data-idx="${idx}" onclick="recallInvoice(${idx})">Recall</button>
-            <button class="btn" data-idx="${idx}" onclick="deleteInvoice(${idx})">Delete</button>
-          </div>`;
+  <div style="font-weight:600">${it.custName} • ₹${it.amount}</div>
+  <div class="small">${new Date(it.ts).toLocaleString()} | ${it.paymentType} | ${it.template}</div>
+</div>
+<div style="display:flex;flex-direction:column;gap:6px">
+  <button class="btn ghost" data-idx="${idx}" onclick="recallInvoice(${idx})">Recall</button>
+  <button class="btn" data-idx="${idx}" onclick="deleteInvoice(${idx})">Delete</button>
+</div>`;
+
         historyEl.appendChild(el);
       });
     }
